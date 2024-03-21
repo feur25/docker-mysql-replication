@@ -1,0 +1,69 @@
+version: "3.8"
+services:
+  # Configuration du premier serveur maître (master-1) contenant la base de données "employees"
+  master-1:
+    image: mysql:latest
+    container_name: master-1
+    environment:
+      MYSQL_ROOT_PASSWORD: "root"          # Mot de passe root pour MySQL
+      MYSQL_DATABASE: "employees"          # Nom de la base de données à créer
+    volumes:
+      - master-1-data:/var/lib/mysql       # Volume pour stocker les données MySQL
+      - ./master-1/my.cnf:/etc/my.cnf      # Configuration personnalisée pour MySQL
+      - ./master-1/init.sql:/docker-entrypoint-initdb.d/1.sql  # Script d'initialisation pour configurer la réplication
+    networks:
+      - default-network                    # Utilisation du réseau par défaut
+
+  # Configuration du second serveur maître (master-2) contenant la base de données "biblio"
+  master-2:
+    image: mysql:latest
+    container_name: master-2
+    environment:
+      MYSQL_ROOT_PASSWORD: "root"          # Mot de passe root pour MySQL
+      MYSQL_DATABASE: "biblio"             # Nom de la base de données à créer
+    volumes:
+      - master-2-data:/var/lib/mysql       # Volume pour stocker les données MySQL
+      - ./master-2/my.cnf:/etc/my.cnf      # Configuration personnalisée pour MySQL
+      - ./master-2/init.sql:/docker-entrypoint-initdb.d/1.sql  # Script d'initialisation pour configurer la réplication
+    networks:
+      - default-network                    # Utilisation du réseau par défaut
+
+  # Configuration du serveur esclave (slave) répliquant les données depuis les serveurs maîtres
+  slave:
+    image: mysql:latest
+    container_name: slave
+    environment:
+      MYSQL_ROOT_PASSWORD: "root"          # Mot de passe root pour MySQL
+    volumes:
+      - slave-data:/var/lib/mysql          # Volume pour stocker les données MySQL
+      - ./slave/my.cnf:/etc/my.cnf         # Configuration personnalisée pour MySQL
+      - ./slave/init.sql:/docker-entrypoint-initdb.d/1.sql  # Script d'initialisation pour configurer la réplication
+    networks:
+      - default-network                    # Utilisation du réseau par défaut
+    depends_on:
+      - master-1                           # Dépendance pour assurer que le serveur maître 1 démarre en premier
+      - master-2                           # Dépendance pour assurer que le serveur maître 2 démarre en premier
+
+  # Configuration du serveur esclave du serveur esclave (slave-of-slave) répliquant les données depuis le serveur esclave
+  slave-of-slave:
+    image: mysql:latest
+    container_name: slave-of-slave
+    environment:
+      MYSQL_ROOT_PASSWORD: "root"          # Mot de passe root pour MySQL
+    volumes:
+      - slave-of-slave-data:/var/lib/mysql # Volume pour stocker les données MySQL
+      - ./slave-of-slave/my.cnf:/etc/my.cnf # Configuration personnalisée pour MySQL
+      - ./slave-of-slave/init.sql:/docker-entrypoint-initdb.d/1.sql # Script d'initialisation pour configurer la réplication
+    networks:
+      - default-network                    # Utilisation du réseau par défaut
+    depends_on:
+      - slave                              # Dépendance pour assurer que le serveur esclave démarre en premier
+
+networks:
+  default-network:                         # Définition du réseau par défaut
+
+volumes:
+  master-1-data:                           # Définition du volume pour le serveur maître 1
+  master-2-data:                           # Définition du volume pour le serveur maître 2
+  slave-data:                              # Définition du volume pour le serveur esclave
+  slave-of-slave-data:                     # Définition du volume pour le serveur esclave du serveur esclave
