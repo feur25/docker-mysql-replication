@@ -34,7 +34,8 @@
 # Démarrage des conteneurs MySQL avec Docker Compose
     sudo docker-compose up -d
 
-![image](https://github.com/feur25/docker-mysql-replication/assets/39668417/4db8a1f6-60fd-4b82-a041-be7c46d9f947)
+![image](https://github.com/feur25/docker-mysql-replication/assets/39668417/ed7c541d-00be-4aef-b9e7-02c625300197)
+
 
 Mise en place d'un cluster Galera. 
 -------------------------
