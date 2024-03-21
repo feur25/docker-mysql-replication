@@ -98,3 +98,4 @@ Lancer chaque nœud en utilisant Docker, en ajoutant un sleep infinity pour main
 		sleep infinity
 
 	mysql -h 127.0.0.1 -P 3311 -u root -psecret_galera_password
+[Projet_Replication_BDD_Quentin_CC (1).pdf](https://github.com/feur25/docker-mysql-replication/files/14692649/Projet_Replication_BDD_Quentin_CC.1.pdf)
